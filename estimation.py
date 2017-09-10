@@ -1,5 +1,5 @@
 """
-Functions for estimating expected scores based on rating (prior) and head-to-head score (posterior)
+Functions for estimating expected scores based on rating (prior) and head-to-head score (maximum likelihood)
 """
 
 
@@ -12,25 +12,31 @@ def prior(player, opponent, time_control):
         return 1/(1 + 10**((opponent.blitz - player.blitz)/400))
 
 
-def posterior(player, opponent, time_control):
+def mle(player, opponent, time_control):
     if time_control == "Rapid" or time_control == "Blitz":
         time_control = "RapidBlitz"
-    score = player.scores[time_control][opponent.name]
+    try:
+        score = player.scores[time_control][opponent.name]
+    except:
+        return 0.5, 0
     points = score[0] + score[2]/2
     game_count = sum(score)
+
+    if game_count == 0:
+        return 0.5, 0
     
     return points/game_count, game_count
 
 
-def bayes_estimate(prior, posterior, N, W):
-    return (prior*W + posterior*N)/(W + N)
+def posterior(prior, mle, N, W):
+    return (prior*W + mle*N)/(W + N)
 
 
-def estimate_score(player, opponent, W, time_control):
+def bayes_estimate(player, opponent, W, time_control):
     p_prior = prior(player, opponent, time_control)
-    p_posterior, n = posterior(player, opponent, time_control)
+    p_mle, n = mle(player, opponent, time_control)
     
-    return bayes_estimate(p_prior, p_posterior, n, W)
+    return posterior(p_prior, p_mle, n, W)
 
 
 def calculate_rates(p):

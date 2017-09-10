@@ -29,12 +29,12 @@ def assign_scores(player1, player2, score_text, time_control):
     
     # If the players haven't played each other at this format, we won't find the text with the score
     if score_text.find(player1.name) == -1:
-        player1.scores[time_control][player2] = [0,0,0]
-        player2.scores[time_control][player1] = [0,0,0]
+        player1.scores[time_control][player2.name] = [0,0,0]
+        player2.scores[time_control][player1.name] = [0,0,0]
         return
     if score_text.find(player2.name) == -1:
-        player1.scores[time_control][player2] = [0,0,0]
-        player2.scores[time_control][player1] = [0,0,0]
+        player1.scores[time_control][player2.name] = [0,0,0]
+        player2.scores[time_control][player1.name] = [0,0,0]
         return
     
     if score_text.find(player1.name) < score_text.find(player2.name):
