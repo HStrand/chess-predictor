@@ -75,6 +75,20 @@ def simulate_match(player1, player2, W, verbosity):
         return random.choice([player1, player2])
 
 
+def match_simulations(player1, player2, W, N, verbosity):
+    winners = []
+    for i in range(N):
+        winners.append(simulate_match(player1, player2, W, verbosity))
+
+    for player in [player1, player2]:
+        player.wins = winners.count(player)
+        player.win_percentage = player.wins/N
+
+    print(player1, player1.win_percentage)
+    print(player2, player2.win_percentage)
+
+
+
 def simulate_round(players, W, verbosity):
     next_round = []
     while True:
