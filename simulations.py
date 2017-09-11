@@ -3,7 +3,7 @@ from estimation import *
 
 
 def simulate_game(player1, player2, W, time_control, verbosity):
-    rates = calculate_rates(estimate_score(player1, player2, W, time_control))
+    rates = calculate_rates(bayes_estimate(player1, player2, W, time_control))
     u = random.random()
     if u < rates[0]:
         if verbosity == 1:
@@ -19,66 +19,100 @@ def simulate_game(player1, player2, W, time_control, verbosity):
         return 0.5
 
 
-def simulate_match(player1, player2, W, verbosity):
-    if verbosity == 1:
-        print("Match " + str(player1) + " vs. " + str(player2))
-    score = 0
-    # Classical
-    if verbosity == 1:
-        print("Classical")
-    score += simulate_game(player1, player2, W, "Classical", verbosity)
-    score += simulate_game(player1, player2, W, "Classical", verbosity)    
-    if score > 1:
-        return player1
-    if score < 1:
-        return player2
+def simulate_worldcup_match(player1, player2, score, W, verbosity):
+    if player1.current_score is not None and player2.current_score is not None:
+        score = [player1.current_score, player2.current_score]
+    player1.current_score = None
+    player2.current_score = None
+    current_game = sum(score) + 1
+
+    if current_game == 1:
+        if verbosity == 1:            
+            print("Game " + str(int(current_game)) + ": Classical")
+        player1_score = simulate_game(player1, player2, W, "Classical", verbosity)
+        score[0] += player1_score
+        score[1] += 1 - player1_score
+        return simulate_worldcup_match(player1, player2, score, W, verbosity)
+
+    elif current_game == 2:
+        if verbosity == 1:
+            print("Game " + str(int(current_game)) + ": Classical")
+        player1_score = simulate_game(player1, player2, W, "Classical", verbosity)
+        score[0] += player1_score
+        score[1] += 1 - player1_score
+        if score[0] > score[1]:
+            return player1
+        if score[0] < score[1]:
+            return player2
+        return simulate_worldcup_match(player1, player2, score, W, verbosity)
+
+    elif current_game == 3 or current_game == 5:
+        if verbosity == 1:
+            print("Game " + str(int(current_game)) + ": Rapid")
+        player1_score = simulate_game(player1, player2, W, "Rapid", verbosity)
+        score[0] += player1_score
+        score[1] += 1 - player1_score
+        return simulate_worldcup_match(player1, player2, score, W, verbosity)
+
+    elif current_game == 4 or current_game == 6:
+        if verbosity == 1:
+            print("Game " + str(int(current_game)) + ": Rapid")
+        player1_score = simulate_game(player1, player2, W, "Rapid", verbosity)
+        score[0] += player1_score
+        score[1] += 1 - player1_score
+        if score[0] > score[1]:
+            return player1
+        if score[0] < score[1]:
+            return player2
+        return simulate_worldcup_match(player1, player2, score, W, verbosity)
+
+    elif current_game == 7:
+        if verbosity == 1:
+            print("Game " + str(int(current_game)) + ": Blitz")
+        player1_score = simulate_game(player1, player2, W, "Blitz", verbosity)
+        score[0] += player1_score
+        score[1] += 1 - player1_score
+        return simulate_worldcup_match(player1, player2, score, W, verbosity)
+
+    elif current_game == 8:
+        if verbosity == 1:
+            print("Game " + str(int(current_game)) + ": Blitz")
+        player1_score = simulate_game(player1, player2, W, "Blitz", verbosity)
+        score[0] += player1_score
+        score[1] += 1 - player1_score
+        if score[0] > score[1]:
+            return player1
+        if score[0] < score[1]:
+            return player2
+        return simulate_worldcup_match(player1, player2, score, W, verbosity)
+
+    elif current_game == 9: 
+        if verbosity == 1:
+            print("Game " + str(int(current_game)) + ": Armageddon!")
+        player1_score = simulate_game(player1, player2, W, "Blitz", verbosity)
+        score[0] += player1_score
+        score[1] += 1 - player1_score
+        if score[0] > score[1]:
+            return player1
+        if score[0] < score[1]:
+            return player2
+        if score[0] == score[1]:
+            winner = random.choice([player1, player2])
+            return winner
     
-    #Rapid
-    if verbosity == 1:
-        print("Rapid")
-    score += simulate_game(player1, player2, W, "Rapid", verbosity)
-    score += simulate_game(player1, player2, W, "Rapid", verbosity)    
-    if score > 2:
-        return player1
-    if score < 2:
-        return player2
-    
-    #Rapid
-    if verbosity == 1:
-        print("10-minute")
-    score += simulate_game(player1, player2, W, "Rapid", verbosity)
-    score += simulate_game(player1, player2, W, "Rapid", verbosity)    
-    if score > 3:
-        return player1
-    if score < 3:
-        return player2
-    
-    #Blitz
-    if verbosity == 1:
-        print("Blitz")
-    score += simulate_game(player1, player2, W, "Blitz", verbosity)
-    score += simulate_game(player1, player2, W, "Blitz", verbosity)    
-    if score > 4:
-        return player1
-    if score < 4:
-        return player2
-    
-    #Armageddon
-    if verbosity == 1:
-        print("Armageddon!")
-    score += simulate_game(player1, player2, W, "Blitz", verbosity)
-    if score == 4:
-        return player2
-    if score == 5:
-        return player1
-    if score == 4.5:
-        return random.choice([player1, player2])
+    elif current_game > 9:
+        if score[0] > score[1]:
+            return player1
+        if score[0] < score[1]:
+            return player2
 
 
-def match_simulations(player1, player2, W, N, verbosity):
+def worldcup_match_simulations(player1, player2, W, N, verbosity):   
     winners = []
     for i in range(N):
-        winners.append(simulate_match(player1, player2, W, verbosity))
+        player1copy = player1.copy()
+        player2copy = player2.copy()
+        winners.append(simulate_worldcup_match(player1copy, player2copy, [0,0], W, verbosity))
 
     for player in [player1, player2]:
         player.wins = winners.count(player)
@@ -89,12 +123,14 @@ def match_simulations(player1, player2, W, N, verbosity):
 
 
 
-def simulate_round(players, W, verbosity):
+def simulate_worldcup_round(players, W, verbosity):
     next_round = []
     while True:
         player1 = players.pop(0)
         player2 = players.pop(0)
-        winner = simulate_match(player1, player2, W, verbosity)
+        if verbosity == 1:
+            print("Match " + str(player1) + " vs. " + str(player2))
+        winner = simulate_worldcup_match(player1, player2, [0,0], W, verbosity)
         if verbosity == 1:
             print(str(winner) + " won the match")
         next_round.append(winner)
@@ -102,22 +138,26 @@ def simulate_round(players, W, verbosity):
             return next_round
 
 
-def simulate_cup(players, W, verbosity):
+def simulate_worldcup(players, current_round, W, verbosity):
     players = players[:]
-    r = 3
     while True:
         if verbosity == 1:
-            print("Round " + str(r))
-        players = simulate_round(players, W, verbosity)
-        r += 1
+            print("----------")
+            print("Round " + str(current_round))
+            print("----------")
+        players = simulate_worldcup_round(players, W, verbosity)
+        current_round += 1
         if len(players) == 1:            
             return players[0]
 
 
-def cup_simulations(players, N, W, verbosity):
+def worldcup_simulations(players, current_round, N, W, verbosity):    
     winners = []
+    current_scores = [player.current_score for player in players]
     for i in range(N):
-        winners.append(simulate_cup(players, W, 0))
+        for player in players:
+            player.current_score = current_scores[players.index(player)]
+        winners.append(simulate_worldcup(players, current_round, W, verbosity))
         
     for player in players:
         player.wins = winners.count(player)

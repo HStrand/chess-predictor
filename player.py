@@ -9,6 +9,7 @@ class Player:
         self.blitz = blitz
         self.federation = federation
         self.scores = {"Classical": {}, "RapidBlitz": {}}
+        self.current_score = None
         
     def __repr__(self):
         return self.name + " (" + str(self.rating) + ")"
