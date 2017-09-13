@@ -109,10 +109,11 @@ def simulate_worldcup_match(player1, player2, score, W, verbosity):
 
 def worldcup_match_simulations(player1, player2, W, N, verbosity):   
     winners = []
+    current_scores = [player1.current_score, player2.current_score]
     for i in range(N):
-        player1copy = player1.copy()
-        player2copy = player2.copy()
-        winners.append(simulate_worldcup_match(player1copy, player2copy, [0,0], W, verbosity))
+        player1.current_score = current_scores[0]
+        player2.current_score = current_scores[1]
+        winners.append(simulate_worldcup_match(player1, player2, [0,0], W, verbosity))
 
     for player in [player1, player2]:
         player.wins = winners.count(player)
