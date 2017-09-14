@@ -14,14 +14,16 @@ def get_chessgames_tree(player1, player2):
     return tree
 
 
-def get_scores(player1, player2):
+def get_scores(player1, player2, include_rapidblitz=True):
     tree = get_chessgames_tree(player1, player2)
     classical_winner = tree.xpath('//tr//td//a/text()')[13]
     classical_loser = tree.xpath('//tr//td//a/text()')[14]
     classical_score_text = " " + classical_winner + " beat " + classical_loser + tree.xpath('//tr//td/text()')[7]
-    rapid_blitz_score_text = tree.xpath('//tr//td//font/text()')[28]    
-    
-    return classical_score_text, rapid_blitz_score_text
+    if include_rapidblitz:
+        rapid_blitz_score_text = tree.xpath('//tr//td//font/text()')[28]              
+        return classical_score_text, rapid_blitz_score_text
+    else:
+        return classical_score_text
 
 
 def assign_scores(player1, player2, score_text, time_control):
@@ -59,21 +61,26 @@ def assign_scores(player1, player2, score_text, time_control):
     loser.scores[time_control][winner.name] = reverse_score
 
 
-def score_players(player1, player2):
+def score_players(player1, player2, include_rapidblitz=True):
     try:
-        classical_score_text, rapid_blitz_score_text = get_scores(player1, player2)
+        if include_rapidblitz:
+            classical_score_text, rapid_blitz_score_text = get_scores(player1, player2)
+        else:
+            classical_score_text = get_scores(player1, player2, False)
     except:
         player1.scores["Classical"][player2.name] = [0,0,0]
         player2.scores["Classical"][player1.name] = [0,0,0]
-        player1.scores["RapidBlitz"][player2.name] = [0,0,0]
-        player2.scores["RapidBlitz"][player1.name] = [0,0,0]
+        if include_rapidblitz:
+            player1.scores["RapidBlitz"][player2.name] = [0,0,0]
+            player2.scores["RapidBlitz"][player1.name] = [0,0,0]
         return
     assign_scores(player1, player2, classical_score_text, "Classical")
-    assign_scores(player1, player2, rapid_blitz_score_text, "RapidBlitz")
+    if include_rapidblitz:
+        assign_scores(player1, player2, rapid_blitz_score_text, "RapidBlitz")
 
 
-def scrape_scores(players):
+def scrape_scores(players, include_rapidblitz=True):
     for player1 in players:
         for player2 in players:
             print("Fetching head-to-head score between " + player1.name + " and " + player2.name)
-            score_players(player1, player2)
+            score_players(player1, player2, include_rapidblitz)

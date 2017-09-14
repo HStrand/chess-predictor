@@ -1,7 +1,7 @@
 
 class Player:
     
-    def __init__(self, name, fide_id, rating=None, rapid=None, blitz=None, federation=""):
+    def __init__(self, name, fide_id=None, rating=None, rapid=None, blitz=None, federation=""):
         self.name = name
         self.fide_id = str(fide_id)
         self.rating = rating
