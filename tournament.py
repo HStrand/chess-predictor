@@ -86,66 +86,6 @@ class Cup(Tournament):
     def __init__(self, players, rating_weight, verbosity):
         super().__init__(players, rating_weight, verbosity)
 
-"""
-This class contains the pairing format of the FIDE World Cup.
-Knockout matches are played as follows:
-1. 2 classical games
-2. If undecided, 2 rapid games
-3. If undecided, 2 more rapid games
-4. If undecided, 2 blitz games
-5. If undecided, an armageddon game
-"""
-class WorldCup(Cup):
-
-    def __init__(self, players, rating_weight, verbosity):
-        super().__init__(players, rating_weight, verbosity)
-
-    def match(self, player1, player2, score, final=False):
-        if isinstance(player1, str):
-            player1 = self.player_dict[player1]
-        if isinstance(player2, str):
-            player2 = self.player_dict[player2]
-
-        if player1.current_score is not None and player2.current_score is not None:
-            score = [player1.current_score, player2.current_score]
-        player1.current_score = None
-        player2.current_score = None
-        current_game = int(sum(score) + 1)
-
-        if current_game > 9:
-            if self.verbosity > 1:
-                print("Match has ended")
-            if score[0] > score[1]:
-                return player1
-            elif score[0] < score[1]:
-                return player2
-            else:
-                return random.choice([player1, player2])
-
-        game_formats = ["Classical", "Classical", "Rapid", "Rapid", "Rapid", "Rapid", "Blitz", "Blitz", "Blitz"]
-        match_ends = [False, True, False, True, False, True, False, True, True]
-        if final:
-            game_formats = ["Classical", "Classical"] + game_formats
-            match_ends = [False, False] + match_ends
-
-        if self.verbosity > 1:
-            print("Game " + str(current_game) + ": " + game_formats[current_game-1])
-        player1_score = game(player1, player2, self.rating_weight, game_formats[current_game-1], self.verbosity)
-        score[0] += player1_score
-        score[1] += 1 - player1_score
-
-        if match_ends[current_game-1]:
-            if score[0] > score[1]:
-                return player1
-            if score[0] < score[1]:
-                return player2
-
-        if current_game == 9 and score[0] == score[1]:
-            return random.choice([player1, player2])
-
-        else:
-            return self.match(player1, player2, score, final)
-    
     def matches(self, player1, player2, N):
         if isinstance(player1, str):
             player1 = self.player_dict[player1]
@@ -210,3 +150,64 @@ class WorldCup(Cup):
             player.current_score = current_scores[players.index(player)]
             player.wins = winners.count(player)
             player.win_percentage = player.wins/N
+
+"""
+The WorldCup class contains the pairing format of the FIDE World Cup.
+Knockout matches are played as follows:
+1. 2 classical games
+2. If undecided, 2 rapid games
+3. If undecided, 2 more rapid games
+4. If undecided, 2 blitz games
+5. If undecided, an armageddon game
+Note: The final match has 4 classical games.
+"""
+class WorldCup(Cup):
+
+    def __init__(self, players, rating_weight, verbosity):
+        super().__init__(players, rating_weight, verbosity)
+
+    def match(self, player1, player2, score, final=False):
+        if isinstance(player1, str):
+            player1 = self.player_dict[player1]
+        if isinstance(player2, str):
+            player2 = self.player_dict[player2]
+
+        if player1.current_score is not None and player2.current_score is not None:
+            score = [player1.current_score, player2.current_score]
+        player1.current_score = None
+        player2.current_score = None
+        current_game = int(sum(score) + 1)
+
+        if current_game > 9:
+            if self.verbosity > 1:
+                print("Match has ended")
+            if score[0] > score[1]:
+                return player1
+            elif score[0] < score[1]:
+                return player2
+            else:
+                return random.choice([player1, player2])
+
+        game_formats = ["Classical", "Classical", "Rapid", "Rapid", "Rapid", "Rapid", "Blitz", "Blitz", "Blitz"]
+        match_ends = [False, True, False, True, False, True, False, True, True]
+        if final:
+            game_formats = ["Classical", "Classical"] + game_formats
+            match_ends = [False, False] + match_ends
+
+        if self.verbosity > 1:
+            print("Game " + str(current_game) + ": " + game_formats[current_game-1])
+        player1_score = game(player1, player2, self.rating_weight, game_formats[current_game-1], self.verbosity)
+        score[0] += player1_score
+        score[1] += 1 - player1_score
+
+        if match_ends[current_game-1]:
+            if score[0] > score[1]:
+                return player1
+            if score[0] < score[1]:
+                return player2
+
+        if current_game == 9 and score[0] == score[1]:
+            return random.choice([player1, player2])
+
+        else:
+            return self.match(player1, player2, score, final)
