@@ -100,7 +100,7 @@ class WorldCup(Cup):
     def __init__(self, players, rating_weight, verbosity):
         super().__init__(players, rating_weight, verbosity)
 
-    def match(self, player1, player2, score):
+    def match(self, player1, player2, score, final=False):
         if isinstance(player1, str):
             player1 = self.player_dict[player1]
         if isinstance(player2, str):
@@ -124,6 +124,9 @@ class WorldCup(Cup):
 
         game_formats = ["Classical", "Classical", "Rapid", "Rapid", "Rapid", "Rapid", "Blitz", "Blitz", "Blitz"]
         match_ends = [False, True, False, True, False, True, False, True, True]
+        if final:
+            game_formats = ["Classical", "Classical"] + game_formats
+            match_ends = [False, False] + match_ends
 
         if self.verbosity > 1:
             print("Game " + str(current_game) + ": " + game_formats[current_game-1])
@@ -141,7 +144,7 @@ class WorldCup(Cup):
             return random.choice([player1, player2])
 
         else:
-            return self.match(player1, player2, score)
+            return self.match(player1, player2, score, final)
     
     def matches(self, player1, player2, N):
         if isinstance(player1, str):
@@ -164,14 +167,14 @@ class WorldCup(Cup):
             print(player1, player1.win_percentage)
             print(player2, player2.win_percentage)
 
-    def cup_round(self, players):
+    def cup_round(self, players, final=False):
         next_round = []
         while True:
             player1 = players.pop(0)
             player2 = players.pop(0)
             if self.verbosity > 1:
                 print("Match " + str(player1) + " vs. " + str(player2))
-            winner = self.match(player1, player2, [0,0])
+            winner = self.match(player1, player2, [0,0], final)
             if self.verbosity > 1:
                 print(str(winner) + " won the match")
             next_round.append(winner)
@@ -186,7 +189,10 @@ class WorldCup(Cup):
                 print("----------")
                 print("Round " + str(current_round))
                 print("----------")
-            players = self.cup_round(players)
+            if len(players) == 2:
+                players = self.cup_round(players, True)
+            else:
+                players = self.cup_round(players)
             current_round += 1
             if len(players) == 1:            
                 return players[0] 
