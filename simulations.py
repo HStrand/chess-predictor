@@ -159,8 +159,9 @@ def worldcup_simulations(players, current_round, N, W, verbosity):
         for player in players:
             player.current_score = current_scores[players.index(player)]
         winners.append(simulate_worldcup(players, current_round, W, verbosity))
-        
+    
     for player in players:
+        player.current_score = current_scores[players.index(player)]
         player.wins = winners.count(player)
         player.win_percentage = player.wins/N
 
