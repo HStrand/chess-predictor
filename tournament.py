@@ -39,9 +39,9 @@ class Tournament:
         import matplotlib
         import matplotlib.pyplot as plt
         import seaborn as sns
-        names = [player.name.split(" ")[-1] for player in self.players]
-
-        win_percentages = [player.win_percentage for player in self.players]
+        players = self.get_sorted_players()
+        names = [player.name.split(" ")[-1] for player in players]
+        win_percentages = [player.win_percentage for player in players]
         player_df = pd.DataFrame({"Name": names, "Win percentage": win_percentages})
 
         matplotlib.rcParams['figure.figsize'] = (16, 10)
