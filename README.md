@@ -3,4 +3,6 @@ Predicting the results of chess tournaments using Bayesian estimation and Monte 
 
 The approach is described in more detail in a Quora blog post here: https://www.quora.com/profile/H%C3%A5kon-Hapnes-Strand/Posts/Predicting-the-Chess-World-Cup-winner-using-Bayesian-simulation
 
-Check out the Jupyter notebook (world_cup_simulations.ipynb) for example usage.
+Check out the Jupyter notebook (new_simulations.ipynb) for example usage.
+
+Note: simulations.py is now deprecated and replaced by tournament.py.
